@@ -2,6 +2,7 @@
 const express = require('express')
 const morgan = require('morgan')
 const env = require('dotenv')
+const Person = require('./models/person')
 
 const app = express()
 env.config()
@@ -29,33 +30,11 @@ app.use(morgan(function (tokens, req, res) {
   }))
 
 
-let persons = [
-    {
-        "id": 1,
-        "name": "Arto Hellas",
-        "number": "040-123456"
-    },
-    {
-        "id": 2,
-        "name": "Ada Lovelace",
-        "number": "39-44-5323523"
-    },
-    {
-        "id": 3,
-        "name": "Dan Abramov",
-        "number": "12-43-234345"
-    },
-    {
-        "id": 4,
-        "name": "Mary Poppendieck",
-        "number": "39-23-6423122"
-    }
-]
-
-
 // GET ALL DIRECTORY PERSONS
 app.get('/api/persons/', (request, response) => {
-    response.json(persons)
+    Person.find({}).then(res =>{
+        response.json(res)
+    })
 })
 
 
@@ -96,18 +75,8 @@ app.delete('/api/persons/delete/:id', (request, response) => {
 
 
 // ADD A NEW PERSON
-// id generator
-const idGenerator = () => {
-    const myNumber = Math.floor(Math.random() * 1000000000) + 1
-
-    return myNumber
-}
-
-
-// controller
 app.post('/api/persons/', (request, response) => {
     const body = request.body
-    const checkName = persons.find(person => person.name === body.name)
 
     if (!body.name) {
         return response.status(400).json({
@@ -121,21 +90,16 @@ app.post('/api/persons/', (request, response) => {
         })
     }
 
-    if(checkName) {
-        return response.status(400).json({
-            error: 'name must be unique'
-        })
-    }
-
-    const newPerson = {
+    const addPerson = new Person({
         name: body.name,
-        number: body.number,
-        id: idGenerator()
-    }
+        number: body.number
+    })
 
-    persons = persons.concat(newPerson)
-
-    response.json(persons)
+    addPerson.save()
+        .then(res =>{
+        console.log('Person added with succes')
+        response.json(addPerson)
+    })
 })
 
 
