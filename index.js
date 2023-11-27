@@ -12,6 +12,7 @@ app.use(express.json())
 app.use(express.static('build'))
 
 app.use(morgan(function (tokens, req, res) {
+
   const body = req.body
 
   const object = {
@@ -32,6 +33,7 @@ app.use(morgan(function (tokens, req, res) {
 
 // GET ALL DIRECTORY PERSONS
 app.get('/api/persons/', (request, response, next) => {
+
   Person.find({}).then(res => {
     response.json(res)
   })
@@ -42,16 +44,13 @@ app.get('/api/persons/', (request, response, next) => {
 // GET DIRECTORY INFO
 app.get('/info/', async (resquest, response) => {
 
-  const personsData = await Person.find({})
-  console.log(personsData)
-  
+  const personsData = await Person.find({})  
   const currentDate = new Date()
 
   response.send(`
         <h3> Phonebook has info for ${personsData.length} people </h3>
         <h3> ${currentDate} </h3>
     `)
-
 })
 
 
@@ -70,6 +69,7 @@ app.get('/api/persons/:id', (request, response, next) => {
 // DELETE PERSON BY ID
 app.delete('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
+
   Person.findByIdAndDelete(id)
     .then(res => {
       console.log(res)
@@ -80,7 +80,8 @@ app.delete('/api/persons/:id', (request, response, next) => {
 
 
 // ADD A NEW PERSON
-app.post('/api/persons/', async (request, response) => {
+app.post('/api/persons/', async (request, response, next) => {
+
   const { name, number } = request.body
 
   if (!name || !number) {
@@ -95,12 +96,13 @@ app.post('/api/persons/', async (request, response) => {
       console.log('Person added with succes')
       response.json(addPerson)
     })
-
+    .catch(err => next(err))
 })
 
 
 // EDIT USER
-app.put('/api/persons/:id', (request, response) => {
+app.put('/api/persons/:id', (request, response, next) => {
+
   const body = request.body
 
   const person = {
@@ -108,13 +110,15 @@ app.put('/api/persons/:id', (request, response) => {
     number: body.number
   }
 
-  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+  Person.findByIdAndUpdate(request.params.id, person, {
+    new: true,
+    runValidators: true
+  })
     .then(res => {
-      console.log(res)
+      console.log('Person edited with success')
       response.json(res)
     })
     .catch(err => next(err))
-
 })
 
 
@@ -123,12 +127,17 @@ const errorHandler = (error, request, response, next) => {
   if (error.name === 'CastError') {
     response.status(400).send({ error: 'malformated id' })
   }
+  else if(error.name === 'ValidationError'){
+    const myError = error
+    
+    response.status(400).send({error: myError})
+  }
 
   next(error)
 }
 
-app.use(errorHandler)
 
+app.use(errorHandler)
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
