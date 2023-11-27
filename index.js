@@ -51,13 +51,13 @@ app.get('/info/', async (resquest, response) => {
         <h3> Phonebook has info for ${personsData.length} people </h3>
         <h3> ${currentDate} </h3>
     `)
-    
+
 })
 
 
 // GET PERSON BY ID
 app.get('/api/persons/:id', (request, response, next) => {
-  const id = Number(request.params.id)
+  const id = request.params.id
   
   Person.findById(id)
     .then(res => {
