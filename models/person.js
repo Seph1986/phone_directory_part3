@@ -1,12 +1,12 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 const uniqueValidator = require('mongoose-unique-validator')
-require('dotenv').config();
+require('dotenv').config()
 
-const url = process.env.MONGODB_URL
+const url = process.env.MONGODB_URL //eslint-disable-line
 
 
 mongoose.connect(url)
-  .then(res => {
+  .then(res => { //eslint-disable-line
     console.log('conected to MongoDB')
   })
   .catch(err => {
@@ -29,7 +29,7 @@ const myPerson = new mongoose.Schema({
   }
 })
 
-myPerson.plugin(uniqueValidator);
+myPerson.plugin(uniqueValidator)
 
 // FORMATING THE SCHEMA
 myPerson.set('toJSON', {

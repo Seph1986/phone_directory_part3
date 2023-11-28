@@ -37,14 +37,14 @@ app.get('/api/persons/', (request, response, next) => {
   Person.find({}).then(res => {
     response.json(res)
   })
-  .catch(err => next(err))
+    .catch(err => next(err))
 })
 
 
 // GET DIRECTORY INFO
 app.get('/info/', async (resquest, response) => {
 
-  const personsData = await Person.find({})  
+  const personsData = await Person.find({})
   const currentDate = new Date()
 
   response.send(`
@@ -57,13 +57,13 @@ app.get('/info/', async (resquest, response) => {
 // GET PERSON BY ID
 app.get('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
-  
+
   Person.findById(id)
     .then(res => {
       response.json(res)
     })
     .catch(err => next(err))
-}) 
+})
 
 
 // DELETE PERSON BY ID
@@ -83,20 +83,16 @@ app.delete('/api/persons/:id', (request, response, next) => {
 app.post('/api/persons/', async (request, response, next) => {
 
   const { name, number } = request.body
-
-  if (!name || !number) {
-    next(error.name = 'CastError')
-  }
-
-
   const addPerson = new Person({ name, number })
+  console.log('passing from new person')
 
   addPerson.save()
-    .then(res => {
-      console.log('Person added with succes')
+    .then(res => { //eslint-disable-line
+      console.log('passing from save')
       response.json(addPerson)
     })
-    .catch(err => next(err))
+    .catch(err => {
+      next(err)})
 })
 
 
@@ -129,8 +125,8 @@ const errorHandler = (error, request, response, next) => {
   }
   else if(error.name === 'ValidationError'){
     const myError = error
-    
-    response.status(400).send({error: myError})
+
+    response.status(400).send({ error: myError })
   }
 
   next(error)
@@ -147,7 +143,7 @@ app.use(unknownEndpoint)
 
 
 // CONFIGURATION
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 3001 //eslint-disable-line
 app.listen(PORT, () => {
   console.log(`app running on port ${PORT}`)
 })
